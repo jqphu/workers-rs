@@ -250,6 +250,22 @@ impl Request {
         Ok(req)
     }
 
+    /// Clone with additional `RequestInit` parameters.
+    pub fn clone_mut_with_init(&self, init: &RequestInit) -> Result<Self> {
+        web_sys::Request::new_with_request_and_init(&self.edge_request, &init.into())
+            .map(|req| {
+                let mut req: Request = req.into();
+                req.immutable = false;
+                req
+            })
+            .map_err(|e| {
+                Error::JsError(
+                    e.as_string()
+                        .unwrap_or_else(|| "invalid URL or options for Request".to_string()),
+                )
+            })
+    }
+
     pub fn inner(&self) -> &web_sys::Request {
         &self.edge_request
     }
